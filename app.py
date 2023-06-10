@@ -1,5 +1,5 @@
 
-
+import os
 from flask import Flask, jsonify, request
 import tensorflow as tf
 import tensorflow_hub as hub
