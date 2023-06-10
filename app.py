@@ -11,6 +11,9 @@ import numpy as np
 # Initialize Flask app
 app = Flask(__name__)
 
+# Initialize Port
+port = int(os.environ.get('PORT', 8080))
+
 # Connect to firebase
 cred = credentials.Certificate("serviceAccountKey.json")
 firebase_admin.initialize_app(cred)
@@ -101,7 +104,7 @@ def find_top_similar_users(current_user_uid, user_story, embed, n=10):
 
 @app.route('/')
 def getHello():
-    return 'Hello World!'
+    return f'Hello, World! Running on port {port}'
 
 @app.route('/api/users/<string:uid>')
 def get_similar_users(uid):
@@ -115,4 +118,4 @@ def get_similar_users(uid):
     return jsonify(similar_users)
 
 if __name__ == '__main__':
-    app.run(port=8080)
+    app.run()
