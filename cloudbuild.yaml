@@ -23,7 +23,3 @@ steps:
       - '--max-instances=10'
       - '--allow-unauthenticated'
     # You can add additional options here, such as environment variables and service account permissions
-options:
-  build:
-    service_account: cloud-build@collabolio-dev.iam.gserviceaccount.com
-    logs_bucket: gs://collabolio/cloudbuild-logs
