@@ -21,4 +21,5 @@ steps:
       - '--memory=4Gi'
       - '--min-instances=1'
       - '--max-instances=10'
+      - '--allow-unauthenticated'
     # You can add additional options here, such as environment variables and service account permissions
