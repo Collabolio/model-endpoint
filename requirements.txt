@@ -1,0 +1,6 @@
+tensorflow
+tensorflow_hub
+firebase-admin
+pandas
+numpy
+flask
