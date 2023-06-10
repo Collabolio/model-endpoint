@@ -1,4 +1,3 @@
-
 import os
 from flask import Flask, jsonify, request
 import tensorflow as tf
@@ -14,13 +13,8 @@ app = Flask(__name__)
 # Initialize Port
 port = int(os.environ.get('PORT', 8080))
 
-# Test Route
-@app.route('/')
-def getHello():
-    return f'Hello, World! Running on port {port}'
-
 # Connect to firebase
-cred = credentials.Certificate("serviceAccountKey.json")
+cred = credentials.Certificate("https://storage.googleapis.com/collabolio/serviceAccountKey.json")
 firebase_admin.initialize_app(cred)
 db = firestore.client()
 
@@ -104,7 +98,13 @@ def find_top_similar_users(current_user_uid, user_story, embed, n=10):
 
     return similar_users
 
-# Route to get the top N most similar users to a given user
+
+# Define a route for the API
+
+@app.route('/')
+def getHello():
+    return f'Hello, World! Running on port {port}'
+
 @app.route('/api/users/<string:uid>')
 def get_similar_users(uid):
     # Generate user stories
