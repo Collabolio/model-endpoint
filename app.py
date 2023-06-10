@@ -14,7 +14,7 @@ app = Flask(__name__)
 port = int(os.environ.get('PORT', 8080))
 
 # Connect to firebase
-cred = credentials.Certificate("https://storage.googleapis.com/collabolio/serviceAccountKey.json")
+cred = credentials.Certificate("serviceAccountKey.json")
 firebase_admin.initialize_app(cred)
 db = firestore.client()
 
