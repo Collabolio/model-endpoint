@@ -1,3 +1,5 @@
+
+
 from flask import Flask, jsonify, request
 import tensorflow as tf
 import tensorflow_hub as hub
@@ -9,16 +11,13 @@ import numpy as np
 # Initialize Flask app
 app = Flask(__name__)
 
-embed = hub.KerasLayer("https://tfhub.dev/google/universal-sentence-encoder/4", trainable=False)
-
-
-# Get the path to the service account key file from the environment variable
-service_account_key_path = os.environ.get('SERVICE_ACCOUNT_KEY')
-
 # Connect to firebase
-cred = credentials.Certificate(service_account_key_path)
+cred = credentials.Certificate("serviceAccountKey.json")
 firebase_admin.initialize_app(cred)
 db = firestore.client()
+
+embed = hub.KerasLayer("https://tfhub.dev/google/universal-sentence-encoder/4", trainable=False)
+
 
 # Load data
 users = db.collection('users').get()
@@ -86,15 +85,24 @@ def find_top_similar_users(current_user_uid, user_story, embed, n=10):
     most_similar_user_uid = [other_user_uid[i] for i in most_similar_users]
     most_similar_user_scores = similarity_scores.numpy().reshape(-1)[most_similar_users]
 
+    # Convert the similarity scores to float64
+    most_similar_user_scores = most_similar_user_scores.astype(np.float64)
+
+    # Create a list of dictionaries containing the user ID and similarity score for each of the top N most similar users
+    similar_users = []
     for i in range(1, n):
-        print(f"User ID: {most_similar_user_uid[i]}, Similarity Score: {most_similar_user_scores[i]}")
+        similar_user = {"uid": most_similar_user_uid[i], "similarity_score": most_similar_user_scores[i]}
+        similar_users.append(similar_user)
+
+    return similar_users
+
 
 # Define a route for the API
+
 @app.route('/')
-def hello_world():
-    return 'Hello, World!'
+def getHello():
+    return 'Hello World!'
 
-# Define a route for the API
 @app.route('/api/users/<string:uid>')
 def get_similar_users(uid):
     # Generate user stories
