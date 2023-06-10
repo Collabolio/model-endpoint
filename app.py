@@ -115,4 +115,4 @@ def get_similar_users(uid):
     return jsonify(similar_users)
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(port=8080)
