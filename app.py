@@ -65,7 +65,7 @@ def find_top_similar_users(current_user_uid, user_story, embed, n=10):
 
     # Get the current user's data and story
     current_user = user_data.loc[user_data['uid'] == current_user_uid]
-    current_user_story = f"I have Skill {current_user['skills'][0]} , and I'm Interested in {current_user['interests'][0]}"
+    current_user_story = f"I have Skill {current_user['skills'].values.item()} , and I'm Interested in {current_user['interests'].values.item()}"
 
     # Encode the current user story into a vector
     current_user_vector = embed([current_user_story])
