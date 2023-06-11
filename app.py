@@ -18,6 +18,7 @@ cred = credentials.Certificate("serviceAccountKey.json")
 firebase_admin.initialize_app(cred)
 db = firestore.client()
 
+# Use Tensorflow Hub to load Universal Sentence Encoder
 embed = hub.KerasLayer("https://tfhub.dev/google/universal-sentence-encoder/4", trainable=False)
 
 
@@ -35,7 +36,6 @@ for doc in users:
     profile_data.append(data['profile'])
 
 # Process data so it can be use
-
 user_data = pd.DataFrame(user_data, columns=['uid'])
 profile_data = pd.DataFrame(profile_data, columns=['displayName','skills', 'interests'])
 merge_data = pd.merge(user_data, profile_data, left_index=True, right_index=True)
@@ -58,7 +58,7 @@ def generate_user_stories(user_data):
 
 
 # Define a function to find the top N most similar users to a given user
-def find_top_similar_users(current_user_uid, user_story, embed, n=10):
+def find_top_similar_users(current_user_uid, user_story, embed, n):
     # Check if current user not found
     if user_data.loc[user_data['uid'] == current_user_uid].empty:
         return "Current user not found!"
@@ -100,10 +100,9 @@ def find_top_similar_users(current_user_uid, user_story, embed, n=10):
 
 
 # Define a route for the API
-
 @app.route('/')
 def getHello():
-    return f'Hello, World! Running on port {port}'
+    return f'Hello, World!'
 
 @app.route('/api/users/<string:uid>')
 def get_similar_users(uid):
