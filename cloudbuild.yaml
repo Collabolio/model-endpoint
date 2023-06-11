@@ -17,10 +17,11 @@ steps:
       - 'managed'
       - '--region'
       - 'us-central1'
-      - '--cpu=2'
-      - '--memory=4Gi'
+      - '--cpu=1'
+      - '--memory=1Gi'
       - '--min-instances=1'
-      - '--max-instances=10'
+      - '--max-instances=2'
       - '--allow-unauthenticated'
       - '--timeout=900' # Increase the timeout to 900 seconds (15 minutes)
+      - '--no-cpu-throttling' # This is the new line that adds CPU allocation always on
     # You can add additional options here, such as environment variables and service account permissions
