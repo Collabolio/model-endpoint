@@ -18,26 +18,26 @@ cred = credentials.Certificate("serviceAccountKey.json")
 firebase_admin.initialize_app(cred)
 db = firestore.client()
 
+# Use Tensorflow Hub to load Universal Sentence Encoder
 embed = hub.KerasLayer("https://tfhub.dev/google/universal-sentence-encoder/4", trainable=False)
 
 
 # Load data
 users = db.collection('users').get()
 
-user_array = []
+user_data = []
 for doc in users:
     data = doc.to_dict()
-    user_array.append(data)
+    user_data.append(data)
 
-profile_array = []
+profile_data = []
 for doc in users:
     data = doc.to_dict()
-    profile_array.append(data['profile'])
+    profile_data.append(data['profile'])
 
 # Process data so it can be use
-
-user_data = pd.DataFrame(user_array, columns=['uid'])
-profile_data = pd.DataFrame(profile_array, columns=['displayName','skills', 'interests'])
+user_data = pd.DataFrame(user_data, columns=['uid'])
+profile_data = pd.DataFrame(profile_data, columns=['displayName','skills', 'interests'])
 merge_data = pd.merge(user_data, profile_data, left_index=True, right_index=True)
 
 result_data = merge_data[['uid', 'displayName', 'skills', 'interests']]
@@ -46,35 +46,38 @@ result_data['interests'] = result_data['interests'].apply(lambda interest_list: 
 
 user_data = pd.DataFrame(result_data)
 
-# Generate user stories
-user_story = []
-for index, row in user_data.iterrows():
-    user_story.append({
-        "uid": row['uid'],
-        "story": f"I have Skill {row['skills']}, and I'm Interested in {row['interests']}"
-    })
+# Define a function to generate user stories
+def generate_user_stories(user_data):
+    user_story = []
+    for index, row in user_data.iterrows():
+        user_story.append({
+            "uid": row['uid'],
+            "story": f"I have Skill {row['skills']}, and I'm Interested in {row['interests']}"
+        })
+    return user_story
 
-# Encode all other user stories into vectors and store them in a matrix along with the user uid
-other_user_vectors = []
-other_user_uid = []
-for user in user_story:
-    vector = embed([user["story"]])
-    other_user_vectors.append(vector)
-    other_user_uid.append(user["uid"])
-other_user_matrix = np.array(other_user_vectors)
 
 # Define a function to find the top N most similar users to a given user
-def find_top_similar_users(current_user_uid, embed, n):
+def find_top_similar_users(current_user_uid, user_story, embed, n):
     # Check if current user not found
     if user_data.loc[user_data['uid'] == current_user_uid].empty:
         return "Current user not found!"
 
     # Get the current user's data and story
     current_user = user_data.loc[user_data['uid'] == current_user_uid]
-    current_user_story = f"I have Skill {current_user['skills'][0]} , and I'm Interested in {current_user['interests'][0]}"
+    current_user_story = f"I have Skill {current_user['skills'].values.item()} , and I'm Interested in {current_user['interests'].values.item()}"
 
     # Encode the current user story into a vector
     current_user_vector = embed([current_user_story])
+
+    # Encode all other user stories into vectors and store them in a matrix along with the user uid
+    other_user_vectors = []
+    other_user_uid = []
+    for user in user_story:
+        vector = embed([user["story"]])
+        other_user_vectors.append(vector)
+        other_user_uid.append(user["uid"])
+    other_user_matrix = np.array(other_user_vectors)
 
     # Calculate the similarity scores between the current user vector and all other user vectors in the matrix
     similarity_scores = tf.matmul(other_user_matrix, tf.transpose(current_user_vector))
@@ -85,28 +88,29 @@ def find_top_similar_users(current_user_uid, embed, n):
     most_similar_user_scores = similarity_scores.numpy().reshape(-1)[most_similar_users]
 
     # Convert the similarity scores to float64
-    most_similar_user_scores_result = most_similar_user_scores.astype(np.float64)
+    most_similar_user_scores = most_similar_user_scores.astype(np.float64)
 
     # Create a list of dictionaries containing the user ID and similarity score for each of the top N most similar users
     similar_users = []
     for i in range(1, n):
-        similar_user = {"uid": most_similar_user_uid[i], "similarity_score": most_similar_user_scores_result[i]}
+        similar_user = {"uid": most_similar_user_uid[i], "similarity_score": most_similar_user_scores[i]}
         similar_users.append(similar_user)
 
     return similar_users
 
 
 # Define a route for the API
-
 @app.route('/')
 def getHello():
-    return f'Hello, World! Running on port {port}'
+    return f'Hello, World!'
 
 @app.route('/api/users/<string:uid>')
 def get_similar_users(uid):
+    # Generate user stories
+    user_story = generate_user_stories(user_data)
 
     # Find the top N most similar users
-    similar_users = find_top_similar_users(uid, embed, n=500)
+    similar_users = find_top_similar_users(uid, user_story, embed, n=500)
 
     # Return the results as JSON
     return jsonify(similar_users)
