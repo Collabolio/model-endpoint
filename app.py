@@ -1,5 +1,5 @@
 import os
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, render_template
 import tensorflow as tf
 import tensorflow_hub as hub
 import firebase_admin
@@ -108,7 +108,8 @@ def find_top_similar_users(current_user_uid, user_story, embed, n):
 # Define a route for the API
 @app.route('/')
 def getHello():
-    return f'Hello, World!'
+    # Render the index.html template
+    return render_template('index.html')
 
 @app.route('/api/users/<string:uid>/<string:n>')
 def get_similar_users(uid):
