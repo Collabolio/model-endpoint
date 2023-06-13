@@ -23,28 +23,34 @@ embed = hub.KerasLayer("https://tfhub.dev/google/universal-sentence-encoder/4", 
 
 
 # Load data
-users = db.collection('users').get()
+def load_data():
+    users = db.collection('users').get()
 
-user_data = []
-for doc in users:
-    data = doc.to_dict()
-    user_data.append(data)
+    user_data = []
+    for doc in users:
+        data = doc.to_dict()
+        user_data.append(data)
 
-profile_data = []
-for doc in users:
-    data = doc.to_dict()
-    profile_data.append(data['profile'])
+    profile_data = []
+    for doc in users:
+        data = doc.to_dict()
+        profile_data.append(data['profile'])
+    
+    process_data(user_data, profile_data)
 
 # Process data so it can be use
-user_data = pd.DataFrame(user_data, columns=['uid'])
-profile_data = pd.DataFrame(profile_data, columns=['displayName','skills', 'interests'])
-merge_data = pd.merge(user_data, profile_data, left_index=True, right_index=True)
+def process_data(user_data, profile_data):
+    user_data = pd.DataFrame(user_data, columns=['uid'])
+    profile_data = pd.DataFrame(profile_data, columns=['displayName','skills', 'interests'])
+    merge_data = pd.merge(user_data, profile_data, left_index=True, right_index=True)
 
-result_data = merge_data[['uid', 'displayName', 'skills', 'interests']]
-result_data['skills'] = result_data['skills'].apply(lambda skill_list: ', '.join([skill_dict['name'] for skill_dict in skill_list if skill_dict and 'uid' in skill_dict]) if isinstance(skill_list, list) else 'No Skill')
-result_data['interests'] = result_data['interests'].apply(lambda interest_list: ', '.join([interest_dict['name'] for interest_dict in interest_list if interest_dict and 'uid' in interest_dict]) if isinstance(interest_list, list) else 'No Interest')
+    result_data = merge_data[['uid', 'displayName', 'skills', 'interests']]
+    result_data['skills'] = result_data['skills'].apply(lambda skill_list: ', '.join([skill_dict['name'] for skill_dict in skill_list if skill_dict and 'uid' in skill_dict]) if isinstance(skill_list, list) else 'No Skill')
+    result_data['interests'] = result_data['interests'].apply(lambda interest_list: ', '.join([interest_dict['name'] for interest_dict in interest_list if interest_dict and 'uid' in interest_dict]) if isinstance(interest_list, list) else 'No Interest')
 
-user_data = pd.DataFrame(result_data)
+    user_data = pd.DataFrame(result_data)
+
+    generate_user_stories(user_data)
 
 # Define a function to generate user stories
 def generate_user_stories(user_data):
@@ -106,8 +112,8 @@ def getHello():
 
 @app.route('/api/users/<string:uid>')
 def get_similar_users(uid):
-    # Generate user stories
-    user_story = generate_user_stories(user_data)
+    # User story data
+    user_story = load_data()
 
     # Find the top N most similar users
     similar_users = find_top_similar_users(uid, user_story, embed, n=500)
