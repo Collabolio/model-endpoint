@@ -35,8 +35,8 @@ def load_data():
     for doc in users:
         data = doc.to_dict()
         profile_data.append(data['profile'])
-    
-    process_data(user_data, profile_data)
+
+    return user_data, profile_data
 
 # Process data so it can be use
 def process_data(user_data, profile_data):
@@ -50,7 +50,7 @@ def process_data(user_data, profile_data):
 
     user_data = pd.DataFrame(result_data)
 
-    generate_user_stories(user_data)
+    return user_data
 
 # Define a function to generate user stories
 def generate_user_stories(user_data):
@@ -64,7 +64,7 @@ def generate_user_stories(user_data):
 
 
 # Define a function to find the top N most similar users to a given user
-def find_top_similar_users(current_user_uid, user_story, embed, n):
+def find_top_similar_users(current_user_uid, user_data, user_story, embed, n):
     # Check if current user not found
     if user_data.loc[user_data['uid'] == current_user_uid].empty:
         return "Current user not found!"
@@ -107,17 +107,23 @@ def find_top_similar_users(current_user_uid, user_story, embed, n):
 
 # Define a route for the API
 @app.route('/')
-def getHello():
+def index():
     # Render the index.html template
     return render_template('index.html')
 
-@app.route('/api/users/<string:uid>/<string:n>')
-def get_similar_users(uid):
-    # User story data
-    user_story = load_data()
+@app.route('/api/users/<string:current_user_uid>/<int:n>')
+def get_similar_users(current_user_uid, n):
+    # Load data
+    user_data, profile_data = load_data()
 
-    # Find the top N most similar users
-    similar_users = find_top_similar_users(uid, user_story, embed, n)
+    # Process data
+    user_data = process_data(user_data, profile_data)
+
+    # Generate user story
+    user_story = generate_user_stories(user_data)
+
+    # # Find the top N most similar users
+    similar_users = find_top_similar_users(current_user_uid, user_data, user_story, embed, n)
 
     # Return the results as JSON
     return jsonify(similar_users)
