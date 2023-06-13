@@ -1,5 +1,5 @@
 import os
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, render_template
 import tensorflow as tf
 import tensorflow_hub as hub
 import firebase_admin
@@ -23,28 +23,34 @@ embed = hub.KerasLayer("https://tfhub.dev/google/universal-sentence-encoder/4", 
 
 
 # Load data
-users = db.collection('users').get()
+def load_data():
+    users = db.collection('users').get()
 
-user_data = []
-for doc in users:
-    data = doc.to_dict()
-    user_data.append(data)
+    user_data = []
+    for doc in users:
+        data = doc.to_dict()
+        user_data.append(data)
 
-profile_data = []
-for doc in users:
-    data = doc.to_dict()
-    profile_data.append(data['profile'])
+    profile_data = []
+    for doc in users:
+        data = doc.to_dict()
+        profile_data.append(data['profile'])
+
+    return user_data, profile_data
 
 # Process data so it can be use
-user_data = pd.DataFrame(user_data, columns=['uid'])
-profile_data = pd.DataFrame(profile_data, columns=['displayName','skills', 'interests'])
-merge_data = pd.merge(user_data, profile_data, left_index=True, right_index=True)
+def process_data(user_data, profile_data):
+    user_data = pd.DataFrame(user_data, columns=['uid'])
+    profile_data = pd.DataFrame(profile_data, columns=['displayName','skills', 'interests'])
+    merge_data = pd.merge(user_data, profile_data, left_index=True, right_index=True)
 
-result_data = merge_data[['uid', 'displayName', 'skills', 'interests']]
-result_data['skills'] = result_data['skills'].apply(lambda skill_list: ', '.join([skill_dict['name'] for skill_dict in skill_list if skill_dict and 'uid' in skill_dict]) if isinstance(skill_list, list) else 'No Skill')
-result_data['interests'] = result_data['interests'].apply(lambda interest_list: ', '.join([interest_dict['name'] for interest_dict in interest_list if interest_dict and 'uid' in interest_dict]) if isinstance(interest_list, list) else 'No Interest')
+    result_data = merge_data[['uid', 'displayName', 'skills', 'interests']]
+    result_data['skills'] = result_data['skills'].apply(lambda skill_list: ', '.join([skill_dict['name'] for skill_dict in skill_list if skill_dict and 'uid' in skill_dict]) if isinstance(skill_list, list) else 'No Skill')
+    result_data['interests'] = result_data['interests'].apply(lambda interest_list: ', '.join([interest_dict['name'] for interest_dict in interest_list if interest_dict and 'uid' in interest_dict]) if isinstance(interest_list, list) else 'No Interest')
 
-user_data = pd.DataFrame(result_data)
+    user_data = pd.DataFrame(result_data)
+
+    return user_data
 
 # Define a function to generate user stories
 def generate_user_stories(user_data):
@@ -58,7 +64,7 @@ def generate_user_stories(user_data):
 
 
 # Define a function to find the top N most similar users to a given user
-def find_top_similar_users(current_user_uid, user_story, embed, n):
+def find_top_similar_users(current_user_uid, user_data, user_story, embed, n):
     # Check if current user not found
     if user_data.loc[user_data['uid'] == current_user_uid].empty:
         return "Current user not found!"
@@ -101,16 +107,23 @@ def find_top_similar_users(current_user_uid, user_story, embed, n):
 
 # Define a route for the API
 @app.route('/')
-def getHello():
-    return f'Hello, World!'
+def index():
+    # Render the index.html template
+    return render_template('index.html')
 
-@app.route('/api/users/<string:uid>')
-def get_similar_users(uid):
-    # Generate user stories
+@app.route('/api/users/<string:current_user_uid>/<int:n>')
+def get_similar_users(current_user_uid, n):
+    # Load data
+    user_data, profile_data = load_data()
+
+    # Process data
+    user_data = process_data(user_data, profile_data)
+
+    # Generate user story
     user_story = generate_user_stories(user_data)
 
-    # Find the top N most similar users
-    similar_users = find_top_similar_users(uid, user_story, embed, n=500)
+    # # Find the top N most similar users
+    similar_users = find_top_similar_users(current_user_uid, user_data, user_story, embed, n)
 
     # Return the results as JSON
     return jsonify(similar_users)
