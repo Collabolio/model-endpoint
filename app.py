@@ -110,13 +110,13 @@ def find_top_similar_users(current_user_uid, user_story, embed, n):
 def getHello():
     return f'Hello, World!'
 
-@app.route('/api/users/<string:uid>')
+@app.route('/api/users/<string:uid>/<string:n>')
 def get_similar_users(uid):
     # User story data
     user_story = load_data()
 
     # Find the top N most similar users
-    similar_users = find_top_similar_users(uid, user_story, embed, n=500)
+    similar_users = find_top_similar_users(uid, user_story, embed, n)
 
     # Return the results as JSON
     return jsonify(similar_users)
