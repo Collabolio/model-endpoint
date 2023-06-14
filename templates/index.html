@@ -17,11 +17,18 @@
         based on their skills and interests.
       </p>
 
+      <h2>API ENDPOINT</h2>
+      <h4>
+        <a href="https://model-endpoint-onhqnm5xvq-uc.a.run.app"
+          >https://model-endpoint-onhqnm5xvq-uc.a.run.app</a
+        >
+      </h4>
+
       <h2>Usage</h2>
       <p>
         Send a <code>GET</code> request to
-        <code>/api/users/&lt;string:uid&gt;/&lt;string:n&gt;</code> to retrieve
-        the top N most similar users to the user with ID <code>uid</code>.
+        <code>/api/users/&lt;string:uid&gt;/&lt;int:n&gt;</code> to retrieve the
+        top N most similar users to the user with ID <code>uid</code>.
       </p>
 
       <h3>Request</h3>
@@ -45,30 +52,48 @@
       </p>
 
       <h3>Example</h3>
-      <pre><code>$ curl <a href="https://model-endpoint-onhqnm5xvq-uc.a.run.app/api/users/12345/5">https://model-endpoint-onhqnm5xvq-uc.a.run.app/api/users/12345/5</a>
+      <pre><code>$ curl <a href="https://model-endpoint-onhqnm5xvq-uc.a.run.app/api/users/06yJpLuZ79Dbzyky0TQL/10
+">https://model-endpoint-onhqnm5xvq-uc.a.run.app/api/users/06yJpLuZ79Dbzyky0TQL/10
+</a>
     
-[
-    {
-        "uid": "67890",
-        "similarity_score": 0.9562
-    },
-    {
-        "uid": "54321",
-        "similarity_score": 0.9456
-    },
-    {
-        "uid": "98765",
-        "similarity_score": 0.9345
-    },
-    {
-        "uid": "23456",
-        "similarity_score": 0.9123
-    },
-    {
-        "uid": "34567",
-        "similarity_score": 0.9023
-    }
-]</code></pre>
+        [
+        {
+            "similarity_score": 0.8476112484931946,
+            "uid": "DlmikRZzUud87ZVHWPBv"
+        },
+        {
+            "similarity_score": 0.7643425464630127,
+            "uid": "GYWVAv9MsocnhgVqZHfn"
+        },
+        {
+            "similarity_score": 0.7564221024513245,
+            "uid": "yNY9IhalltJZ02tQU0ix"
+        },
+        {
+            "similarity_score": 0.755081057548523,
+            "uid": "J5GkwKqxI217nMLNdY1B"
+        },
+        {
+            "similarity_score": 0.7529898285865784,
+            "uid": "OtatlU0hDcex4Cn5dRKN"
+        },
+        {
+            "similarity_score": 0.7501305937767029,
+            "uid": "vbxf5J04EfvCznIapW3H"
+        },
+        {
+            "similarity_score": 0.7341395616531372,
+            "uid": "AvufTNycNTN9p5aicfjv"
+        },
+        {
+            "similarity_score": 0.734026312828064,
+            "uid": "6mDvGWpmuiCzNoWqkLfP"
+        },
+        {
+            "similarity_score": 0.7308772802352905,
+            "uid": "Gt6OGPcCTzzz2waskmn2"
+        }
+    ]</code></pre>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>

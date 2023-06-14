@@ -2,9 +2,13 @@
 
 This API allows you to find the top N most similar users to a given user based on their skills and interests.
 
+## API ENDPOINT
+
+`https://model-endpoint-onhqnm5xvq-uc.a.run.app`
+
 ## Usage
 
-Send a `GET` request to `/api/users/<string:uid>/<string:n>` to retrieve the top N most similar users to the user with ID `uid`.
+Send a `GET` request to `/api/users/<string:uid>/<int:n>` to retrieve the top N most similar users to the user with ID `uid`.
 
 ### Request
 
@@ -18,28 +22,44 @@ The response is a list of dictionaries, where each dictionary contains the user 
 ### Example
 
 ```bash
-$ curl https://model-endpoint-onhqnm5xvq-uc.a.run.app/api/users/12345/5
+$ curl https://model-endpoint-onhqnm5xvq-uc.a.run.app/api/users/06yJpLuZ79Dbzyky0TQL/10
 
 [
     {
-        "uid": "67890",
-        "similarity_score": 0.9562
+        "similarity_score": 0.8476112484931946,
+        "uid": "DlmikRZzUud87ZVHWPBv"
     },
     {
-        "uid": "54321",
-        "similarity_score": 0.9456
+        "similarity_score": 0.7643425464630127,
+        "uid": "GYWVAv9MsocnhgVqZHfn"
     },
     {
-        "uid": "98765",
-        "similarity_score": 0.9345
+        "similarity_score": 0.7564221024513245,
+        "uid": "yNY9IhalltJZ02tQU0ix"
     },
     {
-        "uid": "23456",
-        "similarity_score": 0.9123
+        "similarity_score": 0.755081057548523,
+        "uid": "J5GkwKqxI217nMLNdY1B"
     },
     {
-        "uid": "34567",
-        "similarity_score": 0.9023
+        "similarity_score": 0.7529898285865784,
+        "uid": "OtatlU0hDcex4Cn5dRKN"
+    },
+    {
+        "similarity_score": 0.7501305937767029,
+        "uid": "vbxf5J04EfvCznIapW3H"
+    },
+    {
+        "similarity_score": 0.7341395616531372,
+        "uid": "AvufTNycNTN9p5aicfjv"
+    },
+    {
+        "similarity_score": 0.734026312828064,
+        "uid": "6mDvGWpmuiCzNoWqkLfP"
+    },
+    {
+        "similarity_score": 0.7308772802352905,
+        "uid": "Gt6OGPcCTzzz2waskmn2"
     }
 ]
 ```
